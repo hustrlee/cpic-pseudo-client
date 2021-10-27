@@ -1,0 +1,114 @@
+openapi: 3.0.1
+info:
+  title: 医审平台案件提交接口
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:7001
+
+paths:
+  /createCase:
+    post:
+      summary: 用于接收渠道推送的案件信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCaseDto"
+            example:
+              custid: 21
+              uuid: ef30e1ca-9888-451d-a328-08bfc6a7d482
+              token:
+                appkey: asdfghjkl
+                images:
+                  - id: 101
+                    name: 567b6bfd24d0c.jpg_e1080.jpg
+                    url: https://am.zdmimg.com/201512/24/567b6bfd24d0c.jpg_e1080.jpg
+                  - id: 102
+                    name: 56ac538d7d464.png_fo742.jpg
+                    url: https://am.zdmimg.com/201601/30/56ac538d7d464.png_fo742.jpg
+                insurecode: "130701199310302288"
+                insurename: 张三
+                registno: XDX202007190002
+                timestamp: "2021-08-21 14:25:36"
+                weight: 3
+                zmark: ""
+      responses:
+        "200":
+          description: 推送案件成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResDto"
+              example:
+                code: 200
+                data: 9
+
+components:
+  schemas:
+    ResDto:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 结果代码。200：推送成功
+        msg:
+          type: string
+          description: 发生错误时，返回错误信息。成功时，不返回该字段。
+        data:
+          type: string
+          description: 成功时，返回任务序号。错误时，不返回该字段。
+
+    CreateCaseDto:
+      type: object
+      properties:
+        custid:
+          type: string
+          description: 客户渠道 ID
+        uuid:
+          type: string
+          description: 标识本次请求的唯一标识，用于客户确认医审结果。由客户端保证唯一性
+        token:
+          type: object
+          description: 案件数据
+          properties:
+            appkey:
+              type: string
+              description: 给渠道客户分配的授权码。
+            images:
+              type: array
+              description: 案件资料图片数组
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 图片序号，在本案件中唯一。由客户端保证唯一性
+                  name:
+                    type: string
+                    description: 图片的名称。
+                  url:
+                    type: string
+                    description: 图片的 URL
+            insurecode:
+              type: string
+              description: 被保险人身份证号
+            insurename:
+              type: string
+              description: 被保险人姓名
+            registno:
+              type: string
+              description: 报案号
+            sign:
+              type: string
+              description: 签名，用以校验参数是否被篡改。
+            timestamp:
+              type: string
+              description: 接口调用时间
+            weight:
+              type: integer
+              description: 任务权重，默认为3，加急任务请设置为5。
+            zmark:
+              type: string
+              description: 保留字段，用于自定义信息，目前未使用。
