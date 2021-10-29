@@ -1,0 +1,125 @@
+openapi: 3.0.1
+info:
+  title: 医审平台案件提交接口
+  version: 1.0.0
+servers:
+- url: http://localhost:7001
+paths:
+  /createCase:
+    post:
+      operationId: createCasePOST
+      requestBody:
+        content:
+          application/json:
+            example:
+              custid: 21
+              uuid: ef30e1ca-9888-451d-a328-08bfc6a7d482
+              token: Encrypted Payload（加密后的数据）
+            schema:
+              $ref: '#/components/schemas/CreateCaseDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                code: 200
+                data: 9
+              schema:
+                $ref: '#/components/schemas/ResDto'
+          description: 推送案件成功
+      summary: 用于接收渠道推送的案件信息
+      x-eov-operation-handler: controllers/DefaultController
+components:
+  schemas:
+    ResDto:
+      example:
+        msg: msg
+        code: 0
+        data: data
+      properties:
+        code:
+          description: 结果代码。200：推送成功
+          type: integer
+        msg:
+          description: 发生错误时，返回错误信息。成功时，不返回该字段。
+          type: string
+        data:
+          description: 成功时，返回任务序号。错误时，不返回该字段。
+          type: string
+      type: object
+    CreateCaseDto:
+      example:
+        custid: custid
+        uuid: uuid
+        token: token
+      properties:
+        custid:
+          description: 客户渠道 ID
+          type: string
+        uuid:
+          description: 标识本次请求的唯一标识，用于客户确认医审结果。由客户端保证唯一性
+          type: string
+        token:
+          description: 经过加密后的案件数据信息
+          type: string
+      type: object
+    CaseDetailDto:
+      example:
+        appkey: asdfghjkl
+        images:
+        - id: 101
+          name: 567b6bfd24d0c.jpg_e1080.jpg
+          url: https://am.zdmimg.com/201512/24/567b6bfd24d0c.jpg_e1080.jpg
+        - id: 102
+          name: 56ac538d7d464.png_fo742.jpg
+          url: https://am.zdmimg.com/201601/30/56ac538d7d464.png_fo742.jpg
+        insurecode: "130701199310302288"
+        insurename: 张三
+        registno: XDX202007190002
+        timestamp: 2021-08-21 14:25:36
+        weight: 3
+        zmark: ""
+      properties:
+        appkey:
+          description: 给渠道客户分配的授权码。
+          type: string
+        images:
+          description: 案件资料图片数组
+          items:
+            $ref: '#/components/schemas/CaseDetailDto_images'
+          type: array
+        insurecode:
+          description: 被保险人身份证号
+          type: string
+        insurename:
+          description: 被保险人姓名
+          type: string
+        registno:
+          description: 报案号
+          type: string
+        sign:
+          description: 签名，用以校验参数是否被篡改。
+          type: string
+        timestamp:
+          description: 接口调用时间
+          type: string
+        weight:
+          description: 任务权重，默认为3，加急任务请设置为5。
+          type: integer
+        zmark:
+          description: 保留字段，用于自定义信息，目前未使用。
+          type: string
+      type: object
+    CaseDetailDto_images:
+      properties:
+        id:
+          description: 图片序号，在本案件中唯一。由客户端保证唯一性
+          type: string
+        name:
+          description: 图片的名称。
+          type: string
+        url:
+          description: 图片的 URL
+          type: string
+      type: object

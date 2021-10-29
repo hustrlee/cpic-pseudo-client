@@ -1,0 +1,10 @@
+#!/bin/sh
+OPENAPI_FILE=interface.yaml
+serverPort=3000
+
+docker run --rm -it -v $(pwd):/local -u $(id -u):$(id -g) \
+  openapitools/openapi-generator-cli generate \
+  -i /local/${OPENAPI_FILE} \
+  -g nodejs-express-server \
+  -o /local/stub \
+  --additional-properties=serverPort=${serverPort}

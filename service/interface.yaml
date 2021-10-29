@@ -19,21 +19,7 @@ paths:
             example:
               custid: 21
               uuid: ef30e1ca-9888-451d-a328-08bfc6a7d482
-              token:
-                appkey: asdfghjkl
-                images:
-                  - id: 101
-                    name: 567b6bfd24d0c.jpg_e1080.jpg
-                    url: https://am.zdmimg.com/201512/24/567b6bfd24d0c.jpg_e1080.jpg
-                  - id: 102
-                    name: 56ac538d7d464.png_fo742.jpg
-                    url: https://am.zdmimg.com/201601/30/56ac538d7d464.png_fo742.jpg
-                insurecode: "130701199310302288"
-                insurename: 张三
-                registno: XDX202007190002
-                timestamp: "2021-08-21 14:25:36"
-                weight: 3
-                zmark: ""
+              token: "Encrypted Payload（加密后的数据）"
       responses:
         "200":
           description: 推送案件成功
@@ -115,3 +101,18 @@ components:
         zmark:
           type: string
           description: 保留字段，用于自定义信息，目前未使用。
+      example:
+        appkey: asdfghjkl
+        images:
+          - id: 101
+            name: 567b6bfd24d0c.jpg_e1080.jpg
+            url: https://am.zdmimg.com/201512/24/567b6bfd24d0c.jpg_e1080.jpg
+          - id: 102
+            name: 56ac538d7d464.png_fo742.jpg
+            url: https://am.zdmimg.com/201601/30/56ac538d7d464.png_fo742.jpg
+        insurecode: "130701199310302288"
+        insurename: 张三
+        registno: XDX202007190002
+        timestamp: "2021-08-21 14:25:36"
+        weight: 3
+        zmark: ""
