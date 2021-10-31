@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import uuid
+import json
 import urllib
 
 from minio import Minio
@@ -32,14 +33,15 @@ def get_image_list(root_dir):
     return image_list
 
 
-def upload_image_to_s3(s3_client, bucket, image_list):
+def upload_image_to_s3(s3_client, bucket, src_dir, image_list):
     """上传图像文件到 S3 Server
 
     将image_list中的图像文件，逐一上传到指定的s3_url的指定bucket中。
 
     Args:
         s3_client: S3 Server 的客户端对象
-        bucket: 指定桶，如果不存在则创建它。
+        bucket: 指定桶，如果桶不存在则创建它
+        src_dir: 图像文件的源目录
         image_list: 图像文件列表
 
     Returns:
@@ -50,6 +52,32 @@ def upload_image_to_s3(s3_client, bucket, image_list):
 
     case_id = str(uuid.uuid1())
     url_list = []
+
+    # 检查桶是否存在
+    if not s3_client.bucket_exists(bucket):
+        s3_client.make_bucket(bucket)
+
+    print(f'将 "{src_dir}" 上载到 "{bucket}/{case_id}/" : ', end='')
+    print('0%', end='')
+    for i in range(len(image_list)):
+        # 将图像文件存储到桶
+        print('...', end='', flush=True)
+        image_path, image_filename = os.path.split(image_list[i])
+        s3_client.fput_object(
+            bucket,
+            f'{case_id}/{image_filename}',
+            image_list[i],
+        )
+        print(f'{int((i+1)/len(image_list)*100)}%', end='', flush=True)
+
+        # 获取图像文件分享链接
+        url = s3_client.get_presigned_url(
+            'GET',
+            bucket,
+            f'{case_id}/{image_filename}',
+        )
+        url_list.append(url)
+    print('\n')
 
     return case_id, url_list
 
@@ -66,9 +94,10 @@ if __name__ == '__main__':
         print('Usage: batch-submit <批量提交案件所在目录>\n')
         exit(1)
 
-    # 列出目标目录下的一级子目录
+    # 扫描目标目录下的一级子目录
     root_dir = sys.argv[1]
     sub_dirs = os.listdir(root_dir)
+    print('在目录 "%s" 中共扫描到 %s 个子目录' % (root_dir, len(sub_dirs)))
 
     s3_client = Minio(
         "localhost:9000",
@@ -83,6 +112,15 @@ if __name__ == '__main__':
         image_list = get_image_list(os.path.join(root_dir, sub_dir))
 
         # 将图像文件上传到 Minio Server
-        case_id, url_list = upload_image_to_s3(s3_client, "temp", image_list)
+        case_id, url_list = upload_image_to_s3(
+            s3_client,
+            "temp",
+            sub_dir,
+            image_list,
+        )
 
         # 生成报案
+        print(f'案件 uuid: {case_id}')
+        print('案件图像链接: ')
+        for url in url_list:
+            print(url)

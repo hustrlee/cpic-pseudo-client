@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>图像预览</title>
+    <meta charset="utf-8" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div>
+        <input v-model.lazy="imgsrc" style="width: 50%" />
+      </div>
+      <img :src="imgsrc" width="50%" />
+    </div>
+
+    <script>
+      var app = new Vue({
+        el: "#app",
+        data: {
+          imgsrc: "",
+        },
+      });
+    </script>
+  </body>
+</html>
