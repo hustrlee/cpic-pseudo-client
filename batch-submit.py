@@ -77,7 +77,7 @@ def upload_image_to_s3(s3_client, bucket, src_dir, image_list):
             f'{case_id}/{image_filename}',
         )
         url_list.append(url)
-    print('\n')
+    print('')
 
     return case_id, url_list
 
@@ -124,3 +124,4 @@ if __name__ == '__main__':
         print('案件图像链接: ')
         for url in url_list:
             print(url)
+        print('')
