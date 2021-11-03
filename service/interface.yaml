@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:7001
+  - url: http://localhost:3000
 
 paths:
   /createCase:
@@ -57,7 +57,28 @@ components:
           description: 标识本次请求的唯一标识，用于客户确认医审结果。由客户端保证唯一性
         token:
           type: string
-          description: 经过加密后的案件数据信息
+          description: |
+            经过加密后的案件数据信息。
+
+            ## 加密方案
+            ---
+            ### 1. 原始的案件详情数据结构
+            原始的案件详情数据结构请参考：*CaseDetailDto*
+
+            ### 2. 加密参数及密钥
+
+    ImageDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 图片序号，在本案件中唯一。由客户端保证唯一性
+        name:
+          type: string
+          description: 图片的名称。
+        url:
+          type: string
+          description: 图片的 URL
 
     CaseDetailDto:
       type: object
@@ -69,17 +90,7 @@ components:
           type: array
           description: 案件资料图片数组
           items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: 图片序号，在本案件中唯一。由客户端保证唯一性
-              name:
-                type: string
-                description: 图片的名称。
-              url:
-                type: string
-                description: 图片的 URL
+            $ref: "#/components/schemas/ImageDetailDto"
         insurecode:
           type: string
           description: 被保险人身份证号
