@@ -1,0 +1,21 @@
+{
+  "name": "gdtb",
+  "version": "1.0.0",
+  "description": "基于最新Express 4.x的基础开发模板，整合以前开发过程中遇到的各种bug",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "陈瑾毅",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "eventproxy": "^1.0.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "log4js": "^6.3.0",
+    "mysql": "^2.18.1",
+    "request": "^2.88.2"
+  }
+}
