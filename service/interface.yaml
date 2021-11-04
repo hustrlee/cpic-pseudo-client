@@ -65,7 +65,7 @@ components:
             ### 1. 原始的案件详情数据结构
             原始的案件详情数据结构请参考：*CaseDetailDto*
 
-            ### 2. 加密参数及密钥
+            ### 2. 由平台方分配的用户参数
 
     ImageDetailDto:
       type: object
