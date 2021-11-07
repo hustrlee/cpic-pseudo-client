@@ -21,7 +21,7 @@ def pkcs7padding(s: str) -> str:
 
 
 def aes_ecb_encrypt(key: str, msg: str) -> str:
-    md5(key.encode("utf-8"))
+    md5(key.encode("utf-8")).hexdigest()
     return
 
 
