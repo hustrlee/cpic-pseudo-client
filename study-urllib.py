@@ -1,6 +1,76 @@
-import json
-from urllib import request, parse
 import logging
+from urllib import request, parse
+import json
+import time
+import hashlib
+from Crypto.Cipher import AES
+from hashlib import md5
+import base64
+
+"""
+aes-ecb 加解密
+"""
+
+
+def pkcs7padding(s: str) -> str:
+    """
+    PKCS7 Padding
+    """
+    BLOCK_SIZE = AES.block_size
+    return s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * chr(BLOCK_SIZE - len(s) % BLOCK_SIZE)
+
+
+def aes_ecb_encrypt(key: str, msg: str) -> str:
+    md5(key.encode("utf-8"))
+    return
+
+
+# 分配给广东太保的用户参数
+gdtb = {
+    "custid": 21,
+    "appkey": "asdfghjkl",
+    "secretkey": "dwsuhfci",
+    "salt": "hcxw",
+}
+
+# Payload
+token = {
+    "appkey": gdtb["appkey"],
+    "images": [
+        {
+            "id": "101",
+            "name": "567b6bfd24d0c.jpg_e1080.jpg",
+            "url": "https://am.zdmimg.com/201512/24/567b6bfd24d0c.jpg_e1080.jpg",
+        },
+        {
+            "id": "102",
+            "name": "56ac538d7d464.png_fo742.jpg",
+            "url": "https://am.zdmimg.com/201601/30/56ac538d7d464.png_fo742.jpg",
+        },
+    ],
+    "insurecode": "130701199310302288",
+    "insurename": "张三",
+    "registno": "XDX202007190002",
+    # "timestamp": "2021-08-21 14:25:36",
+    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+    "weight": "3",
+    "zmark": "",
+}
+
+uuid = "ef30e1ca-9888-451d-a328-08bfc6a7d482"
+
+sign_md5 = hashlib.md5()
+sign_md5.update(token["appkey"].encode("utf-8"))
+sign_md5.update(token["registno"].encode("utf-8"))
+sign_md5.update(token["timestamp"].encode("utf-8"))
+sign_md5.update(uuid.encode("utf-8"))
+sign_md5.update(gdtb["secretkey"].encode("utf-8"))
+token["sign"] = sign_md5.hexdigest()
+
+aes_key_md5 = hashlib.md5()
+aes_key_md5.update(gdtb["salt"].encode("utf-8"))
+aes_key = aes_key_md5.hexdigest()
+
 
 # POST /api/createCase
 # request_body = json.dumps({
