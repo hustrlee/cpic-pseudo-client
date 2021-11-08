@@ -3,7 +3,7 @@ from base64 import b64encode, b64decode
 from Crypto.Cipher import AES
 
 
-def pad(self, s: str, block_size=AES.block_size) -> bytes:
+def pad(s: str, block_size=AES.block_size) -> bytes:
     """
     PKCS7 填充
 
@@ -18,7 +18,7 @@ def pad(self, s: str, block_size=AES.block_size) -> bytes:
     return s + (block_size - len(s) % block_size) * chr(block_size - len(s) % block_size).encode("utf-8")
 
 
-def unpad(self, s: bytes, block_size=AES.block_size) -> str:
+def unpad(s: bytes, block_size=AES.block_size) -> str:
     """
     PKCS7 去填充
 
