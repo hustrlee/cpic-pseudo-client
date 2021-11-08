@@ -7,4 +7,4 @@ plaintext = aesEcb.decrypt(
   "E7chJzwwyUY4E0xjys0J3aNqrGDW7D2VG7pVVbLROgQ="
 );
 
-console.log(plaintext);
+console.log("plaintext:", plaintext);
