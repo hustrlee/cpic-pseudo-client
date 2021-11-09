@@ -7,7 +7,7 @@ const Service = require('./Service');
 * createCaseDto CreateCaseDto 
 * returns ResDto
 * */
-const createCasePOST = ({ createCaseDto }) => new Promise(
+const createCase = ({ createCaseDto }) => new Promise(
   async (resolve, reject) => {
     try {
       resolve(Service.successResponse({
@@ -23,5 +23,5 @@ const createCasePOST = ({ createCaseDto }) => new Promise(
 );
 
 module.exports = {
-  createCasePOST,
+  createCase,
 };

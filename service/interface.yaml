@@ -4,12 +4,13 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3001
 
 paths:
   /createCase:
     post:
       summary: 用于接收渠道推送的案件信息
+      operationId: createCase
       requestBody:
         required: true
         content:
@@ -17,8 +18,8 @@ paths:
             schema:
               $ref: "#/components/schemas/CreateCaseDto"
             example:
-              custid: 21
-              uuid: ef30e1ca-9888-451d-a328-08bfc6a7d482
+              custid: "21"
+              uuid: "ef30e1ca-9888-451d-a328-08bfc6a7d482"
               token: "Encrypted Payload（加密后的数据）"
       responses:
         "200":
@@ -29,7 +30,7 @@ paths:
                 $ref: "#/components/schemas/ResDto"
               example:
                 code: 200
-                data: 9
+                data: "9"
 
 components:
   schemas:
@@ -62,10 +63,42 @@ components:
 
             ## 加密方案
             ---
+
+            为了保证数据的安全性，案件数据采用 `aes-256-ecb` 加密，加密结果使用 `base64` 编码。
+
             ### 1. 原始的案件详情数据结构
+
             原始的案件详情数据结构请参考：*CaseDetailDto*
 
-            ### 2. 由平台方分配的用户参数
+            ### 2. 由平台方分配给用户的参数
+
+            | 参数名 | 描述 | 给广东太保分配的值 |
+            |:-------|:-----|:-----------------:|
+            | custid | 用户渠道 ID | 21 |
+            | appkey | 用户授权码 | asdfghjkl |
+            | secretkey | 用户安全码 | dwsuhfci |
+            | salt | 加密密钥明文 | gdtb |
+
+            ### 3. 密钥
+
+            `aes-256-ecb` 加密需要 32bits 的密钥，因此使用 `md5(salt).digest("hex")` 作为加密密钥。
+
+            ### 4. 加密
+
+            Node.js 示例：
+
+            ```javascript
+            const crypto = require("crypto");
+
+            const md5 = crypto.createHash("md5");
+            const cipher = crypto.createCipheriv(
+              "aes-256-ecb",
+              md5.update(salt).digest("hex"),
+              ""
+            );
+            tokenCipher = cipher.update(JSON.stringify(token), "base64");
+            tokenCipher += cipher.final("base64");
+            ```
 
     ImageDetailDto:
       type: object
@@ -102,7 +135,14 @@ components:
           description: 报案号
         sign:
           type: string
-          description: 签名，用以校验参数是否被篡改。
+          description: |
+            签名，用以校验参数是否被篡改。
+
+            **计算方法**：
+
+            ```
+            md5(appkey+registno+timestamp+uuid+secretkey).digest("hex")
+            ```
         timestamp:
           type: string
           description: 接口调用时间
@@ -112,18 +152,3 @@ components:
         zmark:
           type: string
           description: 保留字段，用于自定义信息，目前未使用。
-      example:
-        appkey: asdfghjkl
-        images:
-          - id: 101
-            name: 567b6bfd24d0c.jpg_e1080.jpg
-            url: https://am.zdmimg.com/201512/24/567b6bfd24d0c.jpg_e1080.jpg
-          - id: 102
-            name: 56ac538d7d464.png_fo742.jpg
-            url: https://am.zdmimg.com/201601/30/56ac538d7d464.png_fo742.jpg
-        insurecode: "130701199310302288"
-        insurename: 张三
-        registno: XDX202007190002
-        timestamp: "2021-08-21 14:25:36"
-        weight: 3
-        zmark: ""

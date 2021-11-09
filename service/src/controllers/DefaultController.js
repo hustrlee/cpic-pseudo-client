@@ -8,11 +8,11 @@
 
 const Controller = require('./Controller');
 const service = require('../services/DefaultService');
-const createCasePOST = async (request, response) => {
-  await Controller.handleRequest(request, response, service.createCasePOST);
+const createCase = async (request, response) => {
+  await Controller.handleRequest(request, response, service.createCase);
 };
 
 
 module.exports = {
-  createCasePOST,
+  createCase,
 };

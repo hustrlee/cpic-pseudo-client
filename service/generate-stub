@@ -1,6 +1,6 @@
 #!/bin/sh
 OPENAPI_FILE=interface.yaml
-serverPort=3000
+serverPort=3001
 
 docker run --rm -it -v $(pwd):/local -u $(id -u):$(id -g) \
   openapitools/openapi-generator-cli generate \
