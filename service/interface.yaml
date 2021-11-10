@@ -32,6 +32,21 @@ paths:
                 code: 200
                 data: "9"
 
+  /queryCase:
+    post:
+      summary: 查询任务状态，及识别结果
+      operationId: queryCase
+      responses:
+        "200":
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResDto"
+              example:
+                code: 200
+                data: "9"
+
 components:
   schemas:
     ResDto:
@@ -45,7 +60,7 @@ components:
           description: 发生错误时，返回错误信息。成功时，不返回该字段。
         data:
           type: string
-          description: 成功时，返回任务序号。错误时，不返回该字段。
+          description: 成功时，返回任务序号 / 案件号。错误时，不返回该字段。
 
     CreateCaseDto:
       type: object
@@ -127,10 +142,10 @@ components:
         insurecode:
           type: string
           description: 被保险人身份证号
-        insurename:
+        insureName:
           type: string
           description: 被保险人姓名
-        registno:
+        registNo:
           type: string
           description: 报案号
         sign:
@@ -152,3 +167,130 @@ components:
         zmark:
           type: string
           description: 保留字段，用于自定义信息，目前未使用。
+
+    QueryCaseResDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: 结果代码。200：查询成功
+        msg:
+          type: string
+          description: 发生错误时，返回错误信息。成功时，不返回该字段。
+        uuid:
+          type: string
+          description: 创建任务时，由创建方生成的任务唯一标识。
+        data:
+          type: object
+          description: 查询结果
+          properties:
+            case_state:
+              type: object
+              properties:
+                uploadTime:
+                  type: string
+                  description: 任务的上传时间
+                state:
+                  type: integer
+                  description: 任务状态。0：尚未开始；1：处理中；2：处理完成
+                zmark:
+                  type: string
+                  description: 来自前置平台的备注
+                ymark:
+                  type: string
+                  description: 来自识别平台的备注
+            case_info:
+              type: object
+              properties:
+                caseNo:
+                  type: string
+                  description: 任务号
+                registNo:
+                  type: string
+                  description: 报案号
+                insureName:
+                  type: string
+                  description: 被保险人姓名
+                insurecode:
+                  type: string
+                  description: 被保险人身份证号
+                costType:
+                  type: string
+                  description: 费用类型
+                  enum:
+                    - 门诊
+                    - 住院
+                    - 外购药
+                invoiceTotalAmount:
+                  type: number
+                  description: 案件下所有发票的总金额
+                admissionDate:
+                  type: string
+                  description: 入院日期
+                dischargeDate:
+                  type: string
+                  description: 出院日期
+                hospitalizationDays:
+                  type: number
+                  description: 住院天数
+                invoiceList:
+                  type: array
+                  description: 发票详情列表
+                  items:
+                    type: object
+                    properties:
+                      invoiceNumber:
+                        type: string
+                        description: 发票号码
+                      invoiceName:
+                        type: string
+                        description: 发票名称
+                      invoiceAmount:
+                        type: number
+                        description: 发票金额
+                      invoiceDate:
+                        type: string
+                        description: 开票日期
+                      hospital:
+                        type: string
+                        description: 医院名称或外购药开票单位名称
+                      hospitalGrade:
+                        type: string
+                        description: 医院等级
+                      reimbursementAmount:
+                        type: number
+                        description: 医保报销金额
+                      basicMedicalInsuranceAmount:
+                        type: number
+                        description: 基本医保范围内金额
+                      allExpenseAmount:
+                        type: number
+                        description: 全部自费金额
+                      allExpenseSource:
+                        type: string
+                        description: 全部自费金额来源
+                        enum:
+                          - 清单
+                          - 发票
+                          - 结算单
+                      partsExpenseAmount:
+                        type: number
+                        description: 部分自费金额
+                      partsExpenseSource:
+                        type: number
+                        description: 部分自费金额来源
+                        enum:
+                          - 清单
+                          - 发票
+                          - 结算单
+                      thirdPartyHasPaidAmount:
+                        type: number
+                        description: 第三方支付金额
+            result:
+              type: array
+              items:
+                type: object
+                properties:
+                  imageId:
+                    type: string
+                    description: 图片 ID
