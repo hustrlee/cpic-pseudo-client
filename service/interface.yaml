@@ -257,6 +257,17 @@ components:
                       hospitalGrade:
                         type: string
                         description: 医院等级
+                        enum:
+                          - 三级甲等
+                          - 三级乙等
+                          - 三级丙等
+                          - 二级甲等
+                          - 二级乙等
+                          - 二级丙等
+                          - 一级甲等
+                          - 一级乙等
+                          - 一级丙等
+                          - 其它
                       reimbursementAmount:
                         type: number
                         description: 医保报销金额
@@ -294,3 +305,79 @@ components:
                   imageId:
                     type: string
                     description: 图片 ID
+                  imageName:
+                    type: string
+                    description: 图片名称
+                  moreThanOneList:
+                    type: number
+                    description: 是否一图多票。1：是；2：否
+                  remark:
+                    type: string
+                    description: 备注
+                  details1:
+                    type: array
+                    description: 发票返回值。如果一图多票，则返回多个数组元素。
+                    items:
+                      $ref: "#/components/schemas/InvoiceDetailDto"
+
+    InvoiceDetailDto:
+      type: object
+      properties:
+        imageType:
+          type: number
+          description: 图片类型。在 `details1` 中始终为 `1`
+        imageClassification:
+          type: string
+          description: 图片分类
+          enum:
+            - 门诊发票
+            - 住院发票
+            - 外购药发票
+            - 门诊清单
+            - 住院清单
+            - 结算单
+            - 其它
+        invoiceName:
+          type: string
+          description: 发票名称
+        hospital:
+          type: string
+          description: 医院名称或外购药开票单位名称
+        hospitalGrade:
+          type: string
+          description: 医院等级
+          enum:
+            - 三级甲等
+            - 三级乙等
+            - 三级丙等
+            - 二级甲等
+            - 二级乙等
+            - 二级丙等
+            - 一级甲等
+            - 一级乙等
+            - 一级丙等
+            - 其它
+        name:
+          type: string
+          description: 发票上的姓名
+        invoiceNumber:
+          type: string
+          description: 发票号
+        invoiceDate:
+          type: string
+          description: 发票日期
+        invoiceAmount:
+          type: number
+          description: 发票金额
+        admissionDate:
+          type: string
+          description: 入院日期
+        dischargeDate:
+          type: string
+          description: 出院日期
+        reimbursementAmount:
+          type: number
+          description: 医保统筹金额
+        remark:
+          type: string
+          description: 备注
