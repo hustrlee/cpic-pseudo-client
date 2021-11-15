@@ -29,8 +29,12 @@ services:
       - MYSQL_DATABASE=cpic_db
       - MYSQL_USER=cpic
       - MYSQL_PASSWORD=cpic
+    volumes:
+      - mysql-db:/var/lib/mysql
     ports:
       - 3306:3306
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
 
 volumes:
   minio-data:
+  mysql-db:

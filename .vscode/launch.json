@@ -8,7 +8,7 @@
       "name": "Python: cpic_interface",
       "type": "python",
       "request": "launch",
-      "cwd": "${workspaceFolder}/service/stub-flask",
+      "cwd": "${workspaceFolder}/service/src",
       "console": "integratedTerminal",
       "module": "cpic_interface"
     }

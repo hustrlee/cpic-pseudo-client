@@ -18,7 +18,4 @@ def create_case(create_case_dto=None):  # noqa: E501
     """
     if connexion.request.is_json:
         create_case_dto = CreateCaseDto.from_dict(connexion.request.get_json())  # noqa: E501
-
-    create_case_res_dto = CreateCaseResDto.from_dict({"code": 200, "data": {"caseNo": "9"}})  # noqa: E501
-
-    return create_case_res_dto
+    return 'do some magic!'
