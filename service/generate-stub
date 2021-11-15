@@ -4,11 +4,10 @@ packageName=cpic_interface
 packageVersion=1.0.0
 serverPort=3001
 
-docker run --rm -it -v $(pwd):/local -u $(id -u):$(id -g) \
-  openapitools/openapi-generator-cli:latest generate \
-  -i /local/${OPENAPI_FILE} \
-  -g python-flask \
-  -o /local/stub-flask \
-  --additional-properties=packageName=${packageName} \
-  --additional-properties=packageVersion=${packageVersion} \
-  --additional-properties=serverPort=${serverPort}
+openapi-generator generate \
+-i ${OPENAPI_FILE} \
+-g python-flask \
+-o stub-flask \
+--additional-properties=packageName=${packageName} \
+--additional-properties=packageVersion=${packageVersion} \
+--additional-properties=serverPort=${serverPort}
