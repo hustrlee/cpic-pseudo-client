@@ -18,4 +18,5 @@ def create_case(create_case_dto=None):  # noqa: E501
     """
     if connexion.request.is_json:
         create_case_dto = CreateCaseDto.from_dict(connexion.request.get_json())  # noqa: E501
+
     return 'do some magic!'
