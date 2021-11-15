@@ -1,0 +1,898 @@
+openapi: 3.0.3
+info:
+  title: 广东太保医审平台案件交互接口
+  version: 1.0.0
+servers:
+- description: 内部测试端口
+  url: http://localhost:3001/v1
+paths:
+  /createCase:
+    post:
+      operationId: create_case
+      requestBody:
+        content:
+          application/json:
+            example:
+              custid: "21"
+              uuid: ef30e1ca-9888-451d-a328-08bfc6a7d482
+              token: Encrypted Payload（加密后的案件数据）
+              withCaseInfoInReturn: true
+            schema:
+              $ref: '#/components/schemas/CreateCaseDto'
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                code: 200
+                data:
+                  caseNo: 97604F07-1758-4282-9D43-313C4A3BA1D4
+              schema:
+                $ref: '#/components/schemas/CreateCaseResDto'
+          description: 推送案件成功
+      summary: 用于接收渠道推送的案件信息
+      tags:
+      - Submit Task
+      x-openapi-router-controller: cpic_interface.controllers.submit_task_controller
+  /queryCase:
+    post:
+      operationId: query_case
+      requestBody:
+        content:
+          application/json:
+            example:
+              custid: "21"
+              uuid: ef30e1ca-9888-451d-a328-08bfc6a7d482
+              token: Encrypted Payload（加密后的查询参数）
+            schema:
+              $ref: '#/components/schemas/QueryCaseDto'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryCaseResDto'
+          description: 查询成功
+      summary: 查询任务状态，及识别结果
+      tags:
+      - Query Result
+      x-openapi-router-controller: cpic_interface.controllers.query_result_controller
+components:
+  schemas:
+    CreateCaseDto:
+      example:
+        withCaseInfoInReturn: true
+        custid: custid
+        uuid: uuid
+        token: token
+      properties:
+        custid:
+          description: 客户渠道 ID
+          type: string
+        uuid:
+          description: 标识案件的唯一标识，用于客户确认结果。由客户端保证唯一性。
+          type: string
+        withCaseInfoInReturn:
+          description: 指示是否返回案件详情，用于检验是否正确提交。默认值：false
+          type: boolean
+        token:
+          description: |
+            经过加密后的案件数据信息。
+
+            ## 加密方案
+            ---
+
+            为了保证数据的安全性，案件数据采用`aes-256-ecb`加密，加密结果使用`base64`编码。
+
+            ### 1. 原始的案件详情数据结构
+
+            原始的案件详情数据结构请参考：*OriginalCaseDetailDto*
+
+            ### 2. 由平台方分配给用户的参数
+
+            | 参数名 | 描述 | 给广东太保分配的值 |
+            |:-------|:-----|:-----------------:|
+            | custid | 用户渠道 ID | 21 |
+            | appkey | 用户授权码 | asdfghjkl |
+            | secretkey | 用户安全码 | dwsuhfci |
+            | salt | 加密密钥明文 | gdtb |
+
+            ### 3. 签名
+
+            签名，用以校验参数是否被篡改。
+
+            **计算方法**：
+
+            ```
+            md5(appkey+registno+timestamp+uuid+secretkey).digest("hex")
+            ```
+
+            ### 4. 密钥
+
+            `aes-256-ecb`加密需要 32bits 的密钥，因此使用`md5(salt).digest("hex")`作为加密密钥。
+
+            ### 5. 加密
+
+            Node.js 示例：
+
+            ```javascript
+            const crypto = require("crypto");
+
+            const md5 = crypto.createHash("md5");
+            const cipher = crypto.createCipheriv(
+              "aes-256-ecb",
+              md5.update(salt).digest("hex"),
+              ""
+              );
+            tokenCipher = cipher.update(
+              JSON.stringify(tokenJson),
+              "base64"
+              );
+            tokenCipher += cipher.final("base64");
+            ```
+          type: string
+      required:
+      - custid
+      - token
+      - uuid
+      type: object
+    CreateCaseResDto:
+      description: 当`withCaseInfoInReturn = true`时，在`data`中返回`caseInfo`字段。
+      example:
+        msg: msg
+        code: 0
+        data:
+          caseNo: caseNo
+          caseInfo:
+            insureName: insureName
+            images:
+            - name: name
+              id: id
+              url: url
+            - name: name
+              id: id
+              url: url
+            sign: sign
+            weight: 6
+            appkey: appkey
+            insurecode: insurecode
+            registNo: registNo
+            zmark: zmark
+            timestamp: timestamp
+      properties:
+        code:
+          description: 结果代码。200：推送成功
+          title: code
+          type: integer
+        msg:
+          description: 发生错误时，返回错误信息。成功时，不返回该字段。
+          title: msg
+          type: string
+        data:
+          $ref: '#/components/schemas/CreateCaseResDto_data'
+      title: CreateCaseResDto
+      type: object
+    OriginalCaseDetailDto:
+      example:
+        insureName: insureName
+        images:
+        - name: name
+          id: id
+          url: url
+        - name: name
+          id: id
+          url: url
+        sign: sign
+        weight: 6
+        appkey: appkey
+        insurecode: insurecode
+        registNo: registNo
+        zmark: zmark
+        timestamp: timestamp
+      properties:
+        appkey:
+          description: 给渠道客户分配的授权码。
+          title: appkey
+          type: string
+        images:
+          description: 案件资料图片数组
+          items:
+            $ref: '#/components/schemas/OriginalImageDetailDto'
+          title: images
+          type: array
+        insurecode:
+          description: 被保险人身份证号
+          title: insurecode
+          type: string
+        insureName:
+          description: 被保险人姓名
+          title: insureName
+          type: string
+        registNo:
+          description: 报案号
+          title: registNo
+          type: string
+        sign:
+          description: |
+            签名，用以校验参数是否被篡改。
+
+            **计算方法**：
+
+            ```
+            md5(appkey+registno+timestamp+uuid+secretkey).digest("hex")
+            ```
+          title: sign
+          type: string
+        timestamp:
+          description: 接口调用时间
+          title: timestamp
+          type: string
+        weight:
+          description: 任务权重，默认为3，加急任务请设置为5。
+          title: weight
+          type: integer
+        zmark:
+          description: 保留字段，用于自定义信息，目前未使用。
+          title: zmark
+          type: string
+      title: OriginalCaseDetailDto
+      type: object
+    OriginalImageDetailDto:
+      example:
+        name: name
+        id: id
+        url: url
+      properties:
+        id:
+          description: 图片序号，在本案件中唯一。由客户端保证唯一性
+          title: id
+          type: string
+        name:
+          description: 图片的名称。
+          title: name
+          type: string
+        url:
+          description: 图片的 URL
+          title: url
+          type: string
+      title: OriginalImageDetailDto
+      type: object
+    QueryCaseDto:
+      example:
+        custid: custid
+        uuid: uuid
+        token: token
+      properties:
+        custid:
+          description: 客户渠道 ID
+          type: string
+        uuid:
+          description: 标识案件的唯一标识，用于客户确认结果。由客户端保证唯一性。
+          type: string
+        token:
+          description: |
+            加密后的查询验证条件。
+
+            ## 加密方案
+            ---
+
+            验证数据采用`aes-256-ecb`加密，加密结果使用`base64`编码。
+
+            ### 1. 验证数据的原始数据结构
+
+            | 字段名 | 描述    |
+            |-------|--------|
+            | appkey | 用户授权码  |
+            | caseNo | 任务序号，在提交任务时，由服务端返回，全局唯一  |
+            | registNo | 报案号  |
+            | sign | 参数签名，用以校验传入参数  |
+            | timestamp | 接口调用时间戳  |
+
+            ### 2. 由平台方分配给用户的参数
+
+            | 参数名 | 描述 | 给广东太保分配的值 |
+            |:-------|:-----|:-----------------:|
+            | custid | 用户渠道 ID | 21 |
+            | appkey | 用户授权码 | asdfghjkl |
+            | secretkey | 用户安全码 | dwsuhfci |
+            | salt | 加密密钥明文 | gdtb |
+
+            ### 3. 签名
+
+            签名，用以校验参数是否被篡改。
+
+            **计算方法**：
+
+            ```
+            md5(appkey+caseNo+timestamp+uuid+secretkey).digest("hex")
+            ```
+
+            ### 4. 密钥
+
+            `aes-256-ecb`加密需要 32bits 的密钥，因此使用`md5(salt).digest("hex")`作为加密密钥。
+
+            ### 5. 加密
+
+            Node.js 示例：
+
+            ```javascript
+            const crypto = require("crypto");
+
+            const md5 = crypto.createHash("md5");
+            const cipher = crypto.createCipheriv(
+              "aes-256-ecb",
+              md5.update(salt).digest("hex"),
+              ""
+              );
+            tokenCipher = cipher.update(
+              JSON.stringify(tokenJson),
+              "base64"
+              );
+            tokenCipher += cipher.final("base64");
+            ```
+          type: string
+      type: object
+    QueryCaseResDto:
+      example:
+        msg: msg
+        code: 0
+        data:
+          result:
+          - imageId: imageId
+            imageName: imageName
+            moreThanOneList: 5.637376656633329
+            details3:
+            - null
+            - null
+            details2:
+            - null
+            - null
+            details4:
+            - null
+            - null
+            remark: remark
+            details1:
+            - null
+            - null
+          - imageId: imageId
+            imageName: imageName
+            moreThanOneList: 5.637376656633329
+            details3:
+            - null
+            - null
+            details2:
+            - null
+            - null
+            details4:
+            - null
+            - null
+            remark: remark
+            details1:
+            - null
+            - null
+          caseState:
+            ymark: ymark
+            state: 6
+            uploadTime: uploadTime
+            zmark: zmark
+          caseInfo:
+            invoiceList:
+            - ""
+            - ""
+            insureName: insureName
+            admissionDate: admissionDate
+            dischargeDate: dischargeDate
+            costType: 门诊
+            hospitalizationDays: 5.962133916683182
+            insurecode: insurecode
+            registNo: registNo
+            invoiceTotalAmount: 1.4658129805029452
+            caseNo: caseNo
+        uuid: uuid
+      properties:
+        code:
+          description: 结果代码。200：查询成功
+          title: code
+          type: integer
+        msg:
+          description: 发生错误时，返回错误信息。成功时，不返回该字段。
+          title: msg
+          type: string
+        uuid:
+          description: 创建任务时，由创建方生成的任务唯一标识。
+          title: uuid
+          type: string
+        data:
+          $ref: '#/components/schemas/QueryCaseResDto_data'
+      title: QueryCaseResDto
+      type: object
+    CaseStateDto:
+      example:
+        ymark: ymark
+        state: 6
+        uploadTime: uploadTime
+        zmark: zmark
+      properties:
+        uploadTime:
+          description: 任务的上传时间
+          title: uploadTime
+          type: string
+        state:
+          description: 任务状态。0：尚未开始；1：处理中；2：处理完成
+          enum:
+          - 0
+          - 1
+          - 2
+          title: state
+          type: integer
+        zmark:
+          description: 来自前置平台的备注
+          title: zmark
+          type: string
+        ymark:
+          description: 来自识别平台的备注
+          title: ymark
+          type: string
+      title: CaseStateDto
+      type: object
+    CaseInfoDto:
+      example:
+        invoiceList:
+        - ""
+        - ""
+        insureName: insureName
+        admissionDate: admissionDate
+        dischargeDate: dischargeDate
+        costType: 门诊
+        hospitalizationDays: 5.962133916683182
+        insurecode: insurecode
+        registNo: registNo
+        invoiceTotalAmount: 1.4658129805029452
+        caseNo: caseNo
+      properties:
+        caseNo:
+          description: 任务号
+          title: caseNo
+          type: string
+        registNo:
+          description: 报案号
+          title: registNo
+          type: string
+        insureName:
+          description: 被保险人姓名
+          title: insureName
+          type: string
+        insurecode:
+          description: 被保险人身份证号
+          title: insurecode
+          type: string
+        costType:
+          description: 费用类型
+          enum:
+          - 门诊
+          - 住院
+          - 外购药
+          title: costType
+          type: string
+        invoiceTotalAmount:
+          description: 案件下所有发票的总金额
+          title: invoiceTotalAmount
+          type: number
+        admissionDate:
+          description: 入院日期
+          title: admissionDate
+          type: string
+        dischargeDate:
+          description: 出院日期
+          title: dischargeDate
+          type: string
+        hospitalizationDays:
+          description: 住院天数
+          title: hospitalizationDays
+          type: number
+        invoiceList:
+          description: 发票详情列表
+          items:
+            allOf:
+            - $ref: '#/components/schemas/InvoiceBasicInfoDto'
+            - properties:
+                allExpenseSource:
+                  description: 全部自费金额来源
+                  enum:
+                  - 清单
+                  - 发票
+                  - 结算单
+                  type: string
+                partsExpenseSource:
+                  description: 部分自费金额来源
+                  enum:
+                  - 清单
+                  - 发票
+                  - 结算单
+                  type: string
+                basicMedicalInsuranceAmount:
+                  description: 基本医保范围内金额
+                  type: number
+                thirdPartyHasPaidAmount:
+                  description: 第三方支付金额
+                  type: number
+              type: object
+          title: invoiceList
+          type: array
+      title: CaseInfoDto
+      type: object
+    InvoiceBasicInfoDto:
+      properties:
+        invoiceNumber:
+          description: 发票号码
+          title: invoiceNumber
+          type: string
+        invoiceName:
+          description: 发票名称
+          title: invoiceName
+          type: string
+        invoiceAmount:
+          description: 发票金额
+          title: invoiceAmount
+          type: number
+        invoiceDate:
+          description: 开票日期
+          title: invoiceDate
+          type: string
+        hospital:
+          description: 医院名称或外购药开票单位名称
+          title: hospital
+          type: string
+        hospitalGrade:
+          description: 医院等级
+          enum:
+          - 三级甲等
+          - 三级乙等
+          - 三级丙等
+          - 二级甲等
+          - 二级乙等
+          - 二级丙等
+          - 一级甲等
+          - 一级乙等
+          - 一级丙等
+          - 其它
+          title: hospitalGrade
+          type: string
+        reimbursementAmount:
+          description: 医保统筹（报销）金额
+          title: reimbursementAmount
+          type: number
+        allExpenseAmount:
+          description: 全部自费金额
+          title: allExpenseAmount
+          type: number
+        partsExpenseAmount:
+          description: 部分自费金额
+          title: partsExpenseAmount
+          type: number
+        remark:
+          description: 备注
+          title: remark
+          type: string
+      title: InvoiceBasicInfoDto
+      type: object
+    ImageResultDto:
+      description: 单张图片识别结果，支持一图多票的场景。
+      example:
+        imageId: imageId
+        imageName: imageName
+        moreThanOneList: 5.637376656633329
+        details3:
+        - null
+        - null
+        details2:
+        - null
+        - null
+        details4:
+        - null
+        - null
+        remark: remark
+        details1:
+        - null
+        - null
+      properties:
+        imageId:
+          description: 图片 ID
+          title: imageId
+          type: string
+        imageName:
+          description: 图片名称
+          title: imageName
+          type: string
+        moreThanOneList:
+          description: 是否一图多票。1：是；2：否
+          title: moreThanOneList
+          type: number
+        remark:
+          description: 备注
+          title: remark
+          type: string
+        details1:
+          description: 发票详情。如果一图多票，则返回多个数组元素。
+          items:
+            $ref: '#/components/schemas/InvoiceResultDto'
+          title: details1
+          type: array
+        details2:
+          description: 清单详情。如果一图多票，则返回多个数组元素。
+          items:
+            $ref: '#/components/schemas/ListResultDto'
+          title: details2
+          type: array
+        details3:
+          description: 结算单详情。如果一图多票，则返回多个数组元素。
+          items:
+            $ref: '#/components/schemas/BillResultDto'
+          title: details3
+          type: array
+        details4:
+          description: 其它单据详情。如果一图多票，则返回多个数组元素。
+          items:
+            $ref: '#/components/schemas/OtherResultDto'
+          title: details4
+          type: array
+      title: ImageResultDto
+      type: object
+    ImageTypeDto:
+      properties:
+        imageType:
+          description: 图片类型。
+          enum:
+          - 发票
+          - 清单
+          - 结算单
+          - 其它
+          title: imageType
+          type: string
+        imageClassification:
+          description: 图片分类
+          enum:
+          - 门诊发票
+          - 住院发票
+          - 外购药发票
+          - 门诊清单
+          - 住院清单
+          - 结算单
+          - 其它
+          title: imageClassification
+          type: string
+      title: ImageTypeDto
+      type: object
+    InvoiceResultDto:
+      allOf:
+      - $ref: '#/components/schemas/ImageTypeDto'
+      - $ref: '#/components/schemas/InvoiceBasicInfoDto'
+      title: InvoiceResultDto
+    ListResultDto:
+      allOf:
+      - $ref: '#/components/schemas/ImageTypeDto'
+      - $ref: '#/components/schemas/ListResultDto_allOf'
+      title: ListResultDto
+    ListItemDto:
+      properties:
+        typeName:
+          description: 大项名称。例如：“西药费”、“中药费“
+          title: typeName
+          type: string
+        itemName:
+          description: 项目名称。例如：氯化钠注射液
+          title: itemName
+          type: string
+        specification:
+          description: 规格
+          title: specification
+          type: string
+        count:
+          description: 数量
+          title: count
+          type: number
+        unitPrice:
+          description: 单价
+          title: unitPrice
+          type: number
+        countPrice:
+          description: 费用金额
+          title: countPrice
+          type: number
+        drugClassification:
+          description: 社保标识
+          enum:
+          - 甲
+          - 乙
+          - 自费
+          title: drugClassification
+          type: string
+        drugClassificationSource:
+          description: 社保标识来源
+          enum:
+          - 清单
+          - 医保库
+          title: drugClassificationSource
+          type: string
+        ownPayScale:
+          description: 自付比例
+          title: ownPayScale
+          type: number
+        ownPayAmount:
+          description: 自付金额
+          title: ownPayAmount
+          type: number
+      title: ListItemDto
+      type: object
+    BillResultDto:
+      allOf:
+      - $ref: '#/components/schemas/ImageTypeDto'
+      - $ref: '#/components/schemas/BillResultDto_allOf'
+      title: BillResultDto
+    OtherResultDto:
+      allOf:
+      - $ref: '#/components/schemas/ImageTypeDto'
+      - $ref: '#/components/schemas/OtherResultDto_allOf'
+      title: OtherResultDto
+    CreateCaseResDto_data:
+      example:
+        caseNo: caseNo
+        caseInfo:
+          insureName: insureName
+          images:
+          - name: name
+            id: id
+            url: url
+          - name: name
+            id: id
+            url: url
+          sign: sign
+          weight: 6
+          appkey: appkey
+          insurecode: insurecode
+          registNo: registNo
+          zmark: zmark
+          timestamp: timestamp
+      properties:
+        caseNo:
+          description: 创建案件成功时，返回案件号。由服务端创建，全局唯一。
+          title: caseNo
+          type: string
+        caseInfo:
+          $ref: '#/components/schemas/OriginalCaseDetailDto'
+      title: CreateCaseResDto_data
+      type: object
+    QueryCaseResDto_data:
+      description: 查询结果。
+      example:
+        result:
+        - imageId: imageId
+          imageName: imageName
+          moreThanOneList: 5.637376656633329
+          details3:
+          - null
+          - null
+          details2:
+          - null
+          - null
+          details4:
+          - null
+          - null
+          remark: remark
+          details1:
+          - null
+          - null
+        - imageId: imageId
+          imageName: imageName
+          moreThanOneList: 5.637376656633329
+          details3:
+          - null
+          - null
+          details2:
+          - null
+          - null
+          details4:
+          - null
+          - null
+          remark: remark
+          details1:
+          - null
+          - null
+        caseState:
+          ymark: ymark
+          state: 6
+          uploadTime: uploadTime
+          zmark: zmark
+        caseInfo:
+          invoiceList:
+          - ""
+          - ""
+          insureName: insureName
+          admissionDate: admissionDate
+          dischargeDate: dischargeDate
+          costType: 门诊
+          hospitalizationDays: 5.962133916683182
+          insurecode: insurecode
+          registNo: registNo
+          invoiceTotalAmount: 1.4658129805029452
+          caseNo: caseNo
+      properties:
+        caseState:
+          $ref: '#/components/schemas/CaseStateDto'
+        caseInfo:
+          $ref: '#/components/schemas/CaseInfoDto'
+        result:
+          description: 以每张图片为单位，汇总所有的识别结果。
+          items:
+            $ref: '#/components/schemas/ImageResultDto'
+          title: result
+          type: array
+      title: QueryCaseResDto_data
+      type: object
+    ListResultDto_allOf:
+      description: 单张清单识别详情
+      properties:
+        listName:
+          description: 清单名称
+          title: listName
+          type: string
+        hospital:
+          description: 医院名称
+          title: hospital
+          type: string
+        name:
+          description: 清单上的姓名
+          title: name
+          type: string
+        associatedInvoiceNumber:
+          description: 此清单所对应的发票号
+          title: associatedInvoiceNumber
+          type: string
+        remark:
+          description: 备注
+          title: remark
+          type: string
+        list:
+          description: 清单识别明细
+          items:
+            $ref: '#/components/schemas/ListItemDto'
+          title: list
+          type: array
+      title: ListResultDto_allOf
+      type: object
+    BillResultDto_allOf:
+      properties:
+        totalAmount:
+          description: 总金额
+          title: totalAmount
+          type: number
+        allExpenseAmount:
+          description: 全部自费金额
+          title: allExpenseAmount
+          type: number
+        partsExpenseAmount:
+          description: 部分自费金额
+          title: partsExpenseAmount
+          type: number
+        reimbursementAmount:
+          description: 医保报销金额
+          title: reimbursementAmount
+          type: number
+        remark:
+          description: 备注
+          title: remark
+          type: string
+      title: BillResultDto_allOf
+      type: object
+    OtherResultDto_allOf:
+      properties:
+        ocrResult:
+          description: 识别结果，没有具体定义，任意字符串。
+          title: ocrResult
+          type: string
+        remark:
+          description: 备注
+          title: remark
+          type: string
+      title: OtherResultDto_allOf
+      type: object
