@@ -7,14 +7,14 @@ class Customer(db.Model):
     name = db.Column(db.String(50))
     salt = db.Column(db.String(50))
     appkey = db.Column(db.String(50))
-    secrectkey = db.Column(db.String(50))
+    secretkey = db.Column(db.String(50))
 
-    def __init__(self, custid=None, name=None, salt=None, appkey=None, secrectkey=None):
+    def __init__(self, custid=None, name=None, salt=None, appkey=None, secretkey=None):
         self.custid = custid
         self.name = name
         self.salt = salt
         self.appkey = appkey
-        self.secrectkey = secrectkey
+        self.secretkey = secretkey
 
     def __repr__(self) -> str:
         return "客户名：%r" % self.name

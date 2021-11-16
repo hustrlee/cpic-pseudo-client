@@ -23,13 +23,27 @@ paths:
         "200":
           content:
             application/json:
-              example:
-                code: 200
-                data:
-                  caseNo: 97604F07-1758-4282-9D43-313C4A3BA1D4
+              examples:
+                创建成功:
+                  value:
+                    code: 200
+                    data:
+                      caseNo: 97604F07-1758-4282-9D43-313C4A3BA1D4
+                用户身份认证失败:
+                  value:
+                    code: 401
+                    msg: custid 或 appkey 不正确
+                无效的token:
+                  value:
+                    code: 403
+                    msg: 无效的 token
+                无效的签名:
+                  value:
+                    code: 403
+                    msg: 无效的 sign
               schema:
                 $ref: '#/components/schemas/CreateCaseResDto'
-          description: 推送案件成功
+          description: 完成请求
       summary: 用于接收渠道推送的案件信息
       tags:
       - Submit Task
@@ -161,7 +175,14 @@ components:
             timestamp: timestamp
       properties:
         code:
-          description: 结果代码。200：推送成功
+          description: |
+            结果代码。
+
+            | 代码 | 描述 |
+            |-----|------|
+            | 200 | 创建案件成功 |
+            | 401 | 用户身份认证失败。custid 或 appkey 不正确 |
+            | 403 | 无效的 token，或无效的 sign |
           title: code
           type: integer
         msg:

@@ -26,15 +26,29 @@ paths:
               withCaseInfoInReturn: true
       responses:
         "200":
-          description: 推送案件成功
+          description: 完成请求
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreateCaseResDto"
-              example:
-                code: 200
-                data:
-                  caseNo: "97604F07-1758-4282-9D43-313C4A3BA1D4"
+              examples:
+                创建成功:
+                  value:
+                    code: 200
+                    data:
+                      caseNo: "97604F07-1758-4282-9D43-313C4A3BA1D4"
+                用户身份认证失败:
+                  value:
+                    code: 401
+                    msg: custid 或 appkey 不正确
+                无效的token:
+                  value:
+                    code: 403
+                    msg: 无效的 token
+                无效的签名:
+                  value:
+                    code: 403
+                    msg: 无效的 sign
 
   /queryCase:
     post:
@@ -140,7 +154,14 @@ components:
       properties:
         code:
           type: integer
-          description: 结果代码。200：推送成功
+          description: |
+            结果代码。
+
+            | 代码 | 描述 |
+            |-----|------|
+            | 200 | 创建案件成功 |
+            | 401 | 用户身份认证失败。custid 或 appkey 不正确 |
+            | 403 | 无效的 token，或无效的 sign |
         msg:
           type: string
           description: 发生错误时，返回错误信息。成功时，不返回该字段。
@@ -151,8 +172,8 @@ components:
               type: string
               description: 创建案件成功时，返回案件号。由服务端创建，全局唯一。
             caseInfo:
-              description: 当 `withCaseInfoInReturn = true` 时，返回该字段。
               $ref: "#/components/schemas/OriginalCaseDetailDto"
+              description: 当 `withCaseInfoInReturn = true` 时，返回该字段。
 
     OriginalCaseDetailDto:
       type: object

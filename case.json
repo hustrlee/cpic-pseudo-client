@@ -1,6 +1,6 @@
 {
   "custid": "21",
-  "token": "Encrypted Payload（加密后的案件数据）",
   "uuid": "ef30e1ca-9888-451d-a328-08bfc6a7d482",
-  "withCaseInfoInReturn": true
+  "token": "DhlTSQeybATV0Y7V3fD+CQijfQeDuVGNaZJ6UH9vVrjHOWXFdYS+UzridueGpmCcFq3BXIWUsrTr/n/SuRhlCywwg+C0YzSeZfpKGoUIaXyIQUHpNq7V2tn3WVDh9d3A8sbWD6FqTkEXe/kSPizOFsJwl4rSZWxkHajwwCLzJilkmRU+wQvR/F0LbSlnlaiDTp4z4Q66RJ2RaFwdYB7uLkRocNivKHRFg27LZ/1U+pcXczqVudB2M4CppvqEJkyaUWNh/8EUFeT566zaRZXO3rPl9Lm/eLpLgvC7zWQAo3K3OQefOQj7TyrTtP11fSFy5jeIexKXIsWqkQeb/ssUB9ZN5ZTETgvk2m9S7I6f+u5sqLN66q3qYRXEqET/D2jbKz8f3u4JPfeIGtqL/5CTxrQTnJ7tE+OfnbE/EJh1/nRCYIVbgCx6ogvjkJQQZ3HGUmvHmOFw2Q1jRGir6ZCqytxfAmPhypU6Az/W9M/5ojC7CE0sg7QBnecA5FvYhzz6gjN6wSWCiScDmNUIUcogln0bfmDOV6tW0E1RMpwOarohbUxj5fEmvofgtJEuq0YfDL8g/QBLnaa3jFs3v7mCjOSAky3M7fJrFS8SJDBFQ4D4X1On14gjsTtot4F2ZpAJuUofXv4wqnzbjgnw5uD4GA==",
+  "withCaseInfoInReturn": false
 }
