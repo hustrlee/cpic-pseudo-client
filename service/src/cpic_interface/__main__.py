@@ -3,7 +3,6 @@ import connexion
 
 from cpic_interface import encoder
 from cpic_interface.db_config import init_db
-from cpic_interface.db_models import Customer
 
 
 def main():
@@ -15,6 +14,7 @@ def main():
                        arguments={'title': '广东太保医审平台案件交互接口'},
                        pythonic_params=True)
 
+    connex_app.app.app_context().push()
     init_db(connex_app.app)
 
     connex_app.run(port=3001)

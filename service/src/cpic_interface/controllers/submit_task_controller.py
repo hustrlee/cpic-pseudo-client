@@ -7,9 +7,13 @@ from uuid import uuid1
 from cpic_interface.models.create_case_dto import CreateCaseDto  # noqa: E501
 from cpic_interface.models.create_case_res_dto import CreateCaseResDto  # noqa: E501
 from cpic_interface import util
-from cpic_interface.db_models import Customer
 from cpic_interface import GDTB_CUSTID
 from cpic_interface.common.aes_ecb import AESCipher
+from cpic_interface.db_config import db
+from cpic_interface.db_models import Customer, Case
+
+import pika
+from cpic_interface.mq_config import CasePublisher
 
 
 def create_case(create_case_dto=None):  # noqa: E501
@@ -53,9 +57,47 @@ def create_case(create_case_dto=None):  # noqa: E501
         return {"code": 403, "msg": "无效的 token"}
 
     # 生成 caseNo
-    case_no = uuid1()
+    case_no = str(uuid1())
 
-    # 将任务推送到 rabbitMQ
+    #  将任务保存到数据库
+    case_record = Case(
+        case_no=case_no,
+        uuid=create_case_dto.uuid,
+        appkey=case_info["appkey"],
+        insure_code=case_info["insurecode"],
+        insure_name=case_info["insurename"],
+        regist_no=case_info["registno"],
+        sign=case_info["sign"],
+        timestamp=case_info["timestamp"],
+        weight=case_info["weight"],
+        zmark=case_info["zmark"],
+        images=case_info["images"]
+    )
+    db.session.add(case_record)
+    db.session.commit()
+
+    #  将任务推送到 rabbitMQ
+    # case_publisher = CasePublisher()
+
+    # case_publisher.connect()
+    # case_publisher.publish(msg=json.dumps({"caseNo": case_no, "caseInfo": case_info}).encode())  # noqa
+    # case_publisher.close()
+    # connection = pika.BlockingConnection(
+    #     pika.ConnectionParameters(host='localhost'))
+    # channel = connection.channel()
+
+    # channel.exchange_declare(exchange='case_exchange',
+    #                          exchange_type='fanout', durable=True)
+    # channel.queue_declare(queue='case_queue', durable=True)
+    # channel.queue_bind("case_queue", "case_exchange", routing_key="")
+
+    # channel.basic_publish(
+    #     exchange="case_exchange",
+    #     routing_key='',
+    #     body=json.dumps({"caseNo": case_no, "caseInfo": case_info}).encode(),
+    #     properties=pika.BasicProperties(delivery_mode=2)
+    # )
+    # connection.close()
 
     # 检查是否需要返回 Case_info
     if create_case_dto.with_case_info_in_return:

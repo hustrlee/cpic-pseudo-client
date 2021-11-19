@@ -1,7 +1,8 @@
-from cpic_interface.mq_config import mq
+from cpic_interface.mq_config import CasePublisher
 
-mq.create()
+mq = CasePublisher()
 
-mq.publish("from medical_review exchange!")
-
-mq.close()
+for i in range(500):
+    mq.connect()
+    mq.publish("from medical_review exchange!")
+    mq.close()
