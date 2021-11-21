@@ -1,0 +1,20 @@
+{
+  "name": "cpic-interface",
+  "version": "1.0.0",
+  "description": "广东太保医审信息交互接口",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node index.js"
+  },
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "amqplib": "^0.8.0",
+    "connect": "^3.2.0",
+    "js-yaml": "^3.3.0",
+    "mysql2": "^2.3.3",
+    "oas3-tools": "^2.2.3",
+    "uuid": "^8.3.2"
+  }
+}

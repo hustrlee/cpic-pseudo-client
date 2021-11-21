@@ -1,0 +1,14 @@
+#!/bin/sh
+OPENAPI_FILE=interface.yaml
+packageName=cpic_interface
+packageVersion=1.0.0
+serverPort=3001
+
+export JS_POST_PROCESS_FILE="prettier --write"
+
+openapi-generator generate \
+-i ${OPENAPI_FILE} \
+-g nodejs-express-server \
+-o stub-node \
+--additional-properties=serverPort=${serverPort} \
+--enable-post-process-file

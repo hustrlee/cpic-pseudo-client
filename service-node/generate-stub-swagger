@@ -1,0 +1,12 @@
+#!/bin/sh
+OPENAPI_FILE=interface.yaml
+packageName=cpic_interface
+packageVersion=1.0.0
+serverPort=3001
+
+export JS_POST_PROCESS_FILE="prettier --write"
+
+swagger-codegen generate \
+-i ${OPENAPI_FILE} \
+-l nodejs-server \
+-o stub-node
