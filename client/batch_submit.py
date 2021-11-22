@@ -1,9 +1,12 @@
+import logging
 import sys
 import os
 import re
 import uuid
+import time
+from hashlib import md5
 import json
-import urllib
+from urllib import request
 
 from aes_ecb import AESCipher
 from minio import Minio
@@ -77,7 +80,7 @@ def upload_image_to_s3(s3_client, bucket, src_dir, image_list):
             bucket,
             f'{case_id}/{image_filename}',
         )
-        url_list.append(url)
+        url_list.append({"id": str(i), "name": image_filename, "url": url})
     print('')
 
     return case_id, url_list
@@ -107,6 +110,14 @@ if __name__ == '__main__':
         secure=False,
     )
 
+    # 分配给广东太保的用户参数
+    gdtb = {
+        "custid": "21",
+        "appkey": "asdfghjkl",
+        "secretkey": "dwsuhfci",
+        "salt": "gdtb",
+    }
+
     # 遍历每个子目录
     for sub_dir in sub_dirs:
         # 获取子目录下的所有图像文件列表
@@ -121,8 +132,54 @@ if __name__ == '__main__':
         )
 
         # 生成报案
-        print(f'案件 uuid: {case_id}')
-        print('案件图像链接: ')
-        for url in url_list:
-            print(url)
-        print('')
+        # print(f'案件 uuid: {case_id}')
+        # print('案件图像链接: ')
+        # for url in url_list:
+        #     print(url)
+        # print('')
+
+        # Payload
+        token = {
+            "appkey": gdtb["appkey"],
+            "images": url_list,
+            "insurecode": "130701199310302288",
+            "insurename": "张三",
+            "registno": sub_dir,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            "weight": "3",
+            "zmark": "",
+        }
+
+        case_uuid = str(uuid.uuid1())
+
+        # 生成签名 sign
+        sign_md5 = md5()
+        sign_md5.update(token["appkey"].encode("utf-8"))
+        sign_md5.update(token["registno"].encode("utf-8"))
+        sign_md5.update(token["timestamp"].encode("utf-8"))
+        sign_md5.update(case_uuid.encode("utf-8"))
+        sign_md5.update(gdtb["secretkey"].encode("utf-8"))
+        token["sign"] = sign_md5.hexdigest()
+
+        # 对 Payload 进行加密
+        token_cipher = AESCipher(gdtb["salt"]).encrypt(json.dumps(token))
+
+        # POST /api/createCase
+        request_body = json.dumps({
+            "custid": gdtb["custid"],
+            "uuid": case_uuid,
+            "token": token_cipher,
+            "withCaseInfoInReturn": False
+        })
+        headers = {"content-type": "application/json"}
+        req = request.Request(
+            url="http://localhost:3001/v1/createCase",
+            headers=headers,
+            data=request_body.encode("utf-8")
+        )
+
+        try:
+            res = request.urlopen(req)
+            print(res.read().decode("utf-8"))
+        except Exception as e:
+            logging.error(e)

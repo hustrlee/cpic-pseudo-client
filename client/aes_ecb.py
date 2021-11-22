@@ -52,7 +52,7 @@ class AESCipher:
 
     def encrypt(self, msg: str):
         cipher = AES.new(self.key, AES.MODE_ECB)
-        return b64encode(cipher.encrypt(pad(msg)))
+        return b64encode(cipher.encrypt(pad(msg))).decode("utf-8")
 
     def decrypt(self, enc: str):
         cipher = AES.new(self.key, AES.MODE_ECB)
