@@ -1,0 +1,110 @@
+{
+    "code": 200,
+    "msg": "",
+    "uuid": "UUID",
+    "data": {
+        "case_state": {
+            "uploadTime": "前置平台上传任务时间",
+            "state": "任务状态", //0滞留于分发平台，1识别中，2识别完成
+            "zmark": "来自前置平台的备注",
+            "ymark": "来自识别平台的备注"
+        },
+        "case_info": {
+            "caseNo": "任务号",
+            "registNo": "报案号",
+            "insureName": "被保险人",
+            "insureCode": "身份证号",
+            "costType": "费用类型", //门诊、住院、外购药等
+            "invoiceTotalAmount": "案件下所有发票总金额",
+            "admissionDate": "入院日期",
+            "dischargeDate": "出院日期",
+            "hospitalizationDays": "住院天数",
+            "invoiceList": [
+                {
+                    "invoiceNumber": "发票号码",
+                    "invoiceName": "发票名称",
+                    "invoiceAmount": "该发票号码对应的发票金额",
+                    "invoiceDate": "发票日期",
+                    "hospital": "医院名称或外购药开票单位名称",
+                    "hospitalGrade": "医院等级",
+                    "reimbursementAmount": "医保报销金额",
+                    "basicMedicalInsuranceAmount": "基本医保范围内金额",
+                    "allExpenseAmount": "全部自费金额",
+                    "allExpenseSource": "全部自费金额来源", //包括清单、发票、结算单
+                    "partsExpenseAmount": "部分自费金额",
+                    "partsExpenseSource": "部分自费金额来源", //包括清单、发票、结算单
+                    "thirdPartyHasPaidAmount": "第三方支付金额"
+                }
+            ]
+        },
+        "result": [
+            {
+                "imageId": "图片id",
+                "imageName": "图片名称",
+                "moreThanOneList": "1", //是否一图多票，1是，2 否
+                "remark": "备注",
+                "details1": [ //发票返回示例
+                    {
+                        "imageType": "1", //1发票，2清单，3结算单，4其它
+                        "imageClassification": "图片分类", //包含门诊发票、住院发票、外购药发票、门诊清单、住院清单、结算单、其它等
+                        "invoiceName": "发票名称",
+                        "hospital": "医院名称或外购药开票单位名称",
+                        "hospitalGrade": "医院等级", //外购药发票时为空
+                        "name": "发票上的姓名",
+                        "invoiceNumber": "发票号",
+                        "invoiceDate": "发票日期",
+                        "invoiceAmount": "发票金额",
+                        "admissionDate": "入院日期", //住院发票时使用，门诊发票时为空
+                        "dischargeDate": "出院日期", //住院发票时使用，门诊发票时为空
+                        "reimbursementAmount": "医保统筹金额",
+                        "remark": "备注"
+                    }
+                ],
+                "details2": [ //清单返回示例  
+                    {
+                        "imageType": "2", //1发票，2清单，3结算单，4其它
+                        "imageClassification": "图片分类", //包含门诊发票、住院发票、外购药发票、门诊清单、住院清单、结算单、其它等
+                        "listName": "清单名称",
+                        "hospital": "医院名称",
+                        "name": "清单上的姓名",
+                        "associatedInvoiceNumber": "此清单所对应的发票号",
+                        "remark": "备注",
+                        "list": [ //清单明细
+                            {
+                                "typeName": "大项名称", //如西药费、中药费
+                                "itemName": "项目名称(核减项目）", //如氯化钠注射液
+                                "specifications": "规格",
+                                "count": "数量",
+                                "unitPrice": "单价",
+                                "countPrice": "费用金额",
+                                "drugClassification": "社保标识", //包括甲、乙、自费
+                                "drugClassificationSource": "社保标识来源", //包括清单、医保库
+                                "ownPayScale": "自付比例",
+                                "ownPayAmount": "自付金额（核减金额）"
+                            }
+                        ]
+                    }
+                ],
+                "details3": [ //结算单返回示例
+                    {
+                        "imageType": "3", //1发票，2清单，3结算单，4其它
+                        "imageClassification": "图片分类", //包含门诊发票、住院发票、外购药发票、门诊清单、住院清单、结算单、其它等
+                        "totalAmount": "总金额",
+                        "allExpenseAmount": "全部自费金额",
+                        "partsExpenseAmount": "部分自费金额",
+                        "reimbursementAmount": "医保报销金额",
+                        "remark": "备注"
+                    }
+                ],
+                "details4": [ //其它类型返回示例
+                    {
+                        "imageType": "4", //1发票，2清单，3结算单，4其它
+                        "imageClassification": "图片分类", //包含门诊发票、住院发票、外购药发票、门诊清单、住院清单、结算单、其它等
+                        "ocrResult": "识别结果",
+                        "remark": "备注"
+                    }
+                ]
+            }
+        ]
+    }
+}
