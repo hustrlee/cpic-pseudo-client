@@ -7,8 +7,8 @@ serverPort=3001
 docker run --rm -it -v $(pwd):/local -u $(id -u):$(id -g) \
   openapitools/openapi-generator-cli:latest generate \
   -i /local/${OPENAPI_FILE} \
-  -g python-flask \
-  -o /local/stub-flask \
+  -g nodejs-express-server \
+  -o /local/stub \
   --additional-properties=packageName=${packageName} \
   --additional-properties=packageVersion=${packageVersion} \
   --additional-properties=serverPort=${serverPort}
