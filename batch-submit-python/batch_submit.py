@@ -88,8 +88,9 @@ def upload_image_to_s3(s3_client, bucket, src_dir, image_list):
 
 if __name__ == '__main__':
     # 检查是否指定了案件路径
-    if len(sys.argv) == 1:
-        print('Usage: batch-submit <批量提交案件所在目录>\n')
+    if len(sys.argv) < 3:
+        print('Usage: python batch-submit <批量提交案件所在目录> <S3 地址>\n')
+        print('Example: python batch-submit ./data localhost:9000')
         exit(1)
 
     # 检查指定的目录是否存在
@@ -103,12 +104,21 @@ if __name__ == '__main__':
     sub_dirs = os.listdir(root_dir)
     print('在目录 "%s" 中共扫描到 %s 个子目录' % (root_dir, len(sub_dirs)))
 
+    endpoint = sys.argv[2] or 'localhost:9000'
     s3_client = Minio(
-        "localhost:9000",
-        access_key="minio",
-        secret_key="minio123",
+        endpoint,
+        access_key='minio',
+        secret_key='minio123',
         secure=False,
     )
+
+    # 检查 temp 桶是否存在
+    try:
+        if not s3_client.bucket_exists('temp'):
+            s3_client.make_bucket('temp')
+    except Exception:
+        print('无法连接到 S3 服务器：%s' % endpoint)
+        exit(1)
 
     # 分配给广东太保的用户参数
     gdtb = {
@@ -130,13 +140,6 @@ if __name__ == '__main__':
             sub_dir,
             image_list,
         )
-
-        # 生成报案
-        # print(f'案件 uuid: {case_id}')
-        # print('案件图像链接: ')
-        # for url in url_list:
-        #     print(url)
-        # print('')
 
         # Payload
         token = {
