@@ -88,16 +88,16 @@ def upload_image_to_s3(s3_client, bucket, src_dir, image_list):
 
 if __name__ == '__main__':
     # 检查是否指定了案件路径
-    if len(sys.argv) < 3:
-        print('Usage: python batch-submit <批量提交案件所在目录> <S3 地址>\n')
-        print('Example: python batch-submit ./data localhost:9000')
-        exit(1)
+    if len(sys.argv) < 4:
+        print('Usage: python batch-submit <批量提交案件所在目录> <S3 地址> <createCase 地址>\n')
+        print('Example: python batch-submit ./data localhost:9000 localhost')
+        sys.exit(1)
 
     # 检查指定的目录是否存在
     if not os.path.exists(sys.argv[1]):
         print('error: 目录 "%s" 不存在，请检查目录名是否正确。' % sys.argv[1])
         print('Usage: batch-submit <批量提交案件所在目录>\n')
-        exit(1)
+        sys.exit(1)
 
     # 扫描目标目录下的一级子目录
     root_dir = sys.argv[1]
@@ -118,7 +118,7 @@ if __name__ == '__main__':
             s3_client.make_bucket('temp')
     except Exception:
         print('无法连接到 S3 服务器：%s' % endpoint)
-        exit(1)
+        sys.exit(1)
 
     # 分配给广东太保的用户参数
     gdtb = {
@@ -168,6 +168,7 @@ if __name__ == '__main__':
         token_cipher = AESCipher(gdtb["salt"]).encrypt(json.dumps(token))
 
         # POST /api/createCase
+        host = sys.argv[3] or "localhost"
         request_body = json.dumps({
             "custid": gdtb["custid"],
             "uuid": case_uuid,
@@ -176,7 +177,7 @@ if __name__ == '__main__':
         })
         headers = {"content-type": "application/json"}
         req = request.Request(
-            url="http://localhost:3001/v1/createCase",
+            url="http://%s:3001/v1/createCase" % host,
             headers=headers,
             data=request_body.encode("utf-8")
         )
@@ -185,4 +186,5 @@ if __name__ == '__main__':
             res = request.urlopen(req)
             print(res.read().decode("utf-8"))
         except Exception as e:
-            logging.error(e)
+            print('无法连接到接口服务器：%s' % host)
+            sys.exit(1)
