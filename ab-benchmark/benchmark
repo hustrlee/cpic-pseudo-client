@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ab -c 10 -n 10000 -p case.json -T "application/json" http://localhost:3001/v1/createCase
