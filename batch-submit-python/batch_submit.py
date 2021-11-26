@@ -89,14 +89,13 @@ def upload_image_to_s3(s3_client, bucket, src_dir, image_list):
 if __name__ == '__main__':
     # 检查是否指定了案件路径
     if len(sys.argv) < 4:
-        print('Usage: python batch-submit <批量提交案件所在目录> <S3 地址> <createCase 地址>\n')
-        print('Example: python batch-submit ./data localhost:9000 localhost')
+        print('Usage: batch-submit <批量提交案件所在目录> <S3 地址> <createCase 地址>\n')
+        print('Example: batch-submit ./data accesskey:secretkey@localhost:9000 localhost:3001')  # noqa
         sys.exit(1)
 
     # 检查指定的目录是否存在
     if not os.path.exists(sys.argv[1]):
         print('error: 目录 "%s" 不存在，请检查目录名是否正确。' % sys.argv[1])
-        print('Usage: batch-submit <批量提交案件所在目录>\n')
         sys.exit(1)
 
     # 扫描目标目录下的一级子目录
@@ -104,11 +103,14 @@ if __name__ == '__main__':
     sub_dirs = os.listdir(root_dir)
     print('在目录 "%s" 中共扫描到 %s 个子目录' % (root_dir, len(sub_dirs)))
 
-    endpoint = sys.argv[2] or 'localhost:9000'
+    s3_params = re.split(r'[:|@]', sys.argv[2])
+    access_key = s3_params[0]
+    secret_key = s3_params[1]
+    endpoint = s3_params[2] + ':' + s3_params[3]
     s3_client = Minio(
-        endpoint,
-        access_key='minio',
-        secret_key='minio123',
+        endpoint=endpoint,
+        access_key=access_key,
+        secret_key=secret_key,
         secure=False,
     )
 
@@ -117,7 +119,7 @@ if __name__ == '__main__':
         if not s3_client.bucket_exists('temp'):
             s3_client.make_bucket('temp')
     except Exception:
-        print('无法连接到 S3 服务器：%s' % endpoint)
+        print('无法连接到 S3 服务器：%s:%s@%s' % (access_key, secret_key, endpoint))
         sys.exit(1)
 
     # 分配给广东太保的用户参数
@@ -168,7 +170,7 @@ if __name__ == '__main__':
         token_cipher = AESCipher(gdtb["salt"]).encrypt(json.dumps(token))
 
         # POST /api/createCase
-        host = sys.argv[3] or "localhost"
+        host = sys.argv[3] or "localhost:3001"
         request_body = json.dumps({
             "custid": gdtb["custid"],
             "uuid": case_uuid,
@@ -177,7 +179,7 @@ if __name__ == '__main__':
         })
         headers = {"content-type": "application/json"}
         req = request.Request(
-            url="http://%s:3001/v1/createCase" % host,
+            url="http://%s/v1/createCase" % host,
             headers=headers,
             data=request_body.encode("utf-8")
         )
